@@ -6,36 +6,45 @@ df = pd.read_csv("raw_exoplanet_data.csv")
 
 # Select relevant columns for analysis
 columns = [
-    'pl_name', 'pl_orbper', 'pl_radius', 'pl_discmethod', 'pl_discyear',
-    'pl_orbeccen', 'pl_eqt', 'pl_controvflag',
+    'pl_name', 'pl_orbper', 'pl_radj', 'pl_disc_method', 'pl_disc_year',
+    'pl_orbeccen', 'pl_eqt', 'pl_controv_flag',
     'st_mass', 'st_teff', 'st_rad', 'st_lum', 'st_age'
 ]
 
 df = df[columns]
 
 # Rename for clarity
-df.rename(columns={'pl_controvflag': 'Confirmed'}, inplace=True)
+df.rename(columns={
+    'pl_controvflag': 'Confirmed',
+    'pl_radj': 'pl_radius_rjup'  # keep Jupiter radius temporarily
+}, inplace=True)
 
 # Handle missing data
 # Drop rows with essential nulls (e.g., planet name, radius)
-df = df.dropna(subset=['pl_name', 'pl_radius', 'pl_orbper'])
+df = df.dropna(subset=['pl_name', 'pl_radius_rjup', 'pl_orbper'])
 
 # Fill numerical NaNs with column medians
 num_cols = ['pl_orbeccen', 'pl_eqt', 'st_mass', 'st_teff', 'st_rad', 'st_lum', 'st_age']
 df[num_cols] = df[num_cols].fillna(df[num_cols].median())
 
 # Fill categorical NaNs
-df['pl_discmethod'] = df['pl_discmethod'].fillna('Unknown')
+df['pl_disc_method'] = df['pl_disc_method'].fillna('Unknown')
 df['Confirmed'] = df['Confirmed'].fillna(0).astype(int)
 
 # Fix types
-df['pl_discyear'] = df['pl_discyear'].astype(int)
+df['pl_disc_year'] = df['pl_disc_year'].astype(int)
 df['pl_orbper'] = pd.to_numeric(df['pl_orbper'], errors='coerce')
-df['pl_radius'] = pd.to_numeric(df['pl_radius'], errors='coerce')
+df['pl_radius_rjup'] = pd.to_numeric(df['pl_radius_rjup'], errors='coerce')
+
+# Convert radius from Jupiter radii to Earth radii
+df['pl_radius_rearth'] = df['pl_radius_rjup'] * 11.21
 
 # Remove extreme outliers
 df = df[df['pl_orbper'] < 1e4]
-df = df[df['pl_radius'] < 50]
+df = df[df['pl_radius_rearth'] < 100] # Jupiter ~11, so 100 Earth radii is a very generous cap
+
+# Drop the original Jupiter radius column
+df.drop(columns=['pl_radius_rjup'], inplace=True)
 
 # Reset index
 df.reset_index(drop=True, inplace=True)
