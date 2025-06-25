@@ -6,7 +6,7 @@ df = pd.read_csv("raw_exoplanet_data.csv")
 
 # Select relevant columns for analysis
 columns = [
-    'pl_name', 'pl_orbper', 'pl_radj', 'pl_disc_method', 'pl_disc_year',
+    'pl_name', 'pl_orbper', 'pl_radj', 'disc_method', 'disc_year',
     'pl_orbeccen', 'pl_eqt', 'pl_controv_flag',
     'st_mass', 'st_teff', 'st_rad', 'st_lum', 'st_age'
 ]
@@ -15,7 +15,7 @@ df = df[columns]
 
 # Rename for clarity
 df.rename(columns={
-    'pl_controvflag': 'Confirmed',
+    'pl_controv_flag': 'Confirmed',
     'pl_radj': 'pl_radius_rjup'  # keep Jupiter radius temporarily
 }, inplace=True)
 
@@ -28,11 +28,11 @@ num_cols = ['pl_orbeccen', 'pl_eqt', 'st_mass', 'st_teff', 'st_rad', 'st_lum', '
 df[num_cols] = df[num_cols].fillna(df[num_cols].median())
 
 # Fill categorical NaNs
-df['pl_disc_method'] = df['pl_disc_method'].fillna('Unknown')
+df['disc_method'] = df['disc_method'].fillna('Unknown')
 df['Confirmed'] = df['Confirmed'].fillna(0).astype(int)
 
 # Fix types
-df['pl_disc_year'] = df['pl_disc_year'].astype(int)
+df['disc_year'] = df['disc_year'].astype(int)
 df['pl_orbper'] = pd.to_numeric(df['pl_orbper'], errors='coerce')
 df['pl_radius_rjup'] = pd.to_numeric(df['pl_radius_rjup'], errors='coerce')
 
