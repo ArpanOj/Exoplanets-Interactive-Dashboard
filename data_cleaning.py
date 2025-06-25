@@ -28,6 +28,15 @@ df[num_cols] = df[num_cols].fillna(df[num_cols].median())
 df['pl_discmethod'] = df['pl_discmethod'].fillna('Unknown')
 df['Confirmed'] = df['Confirmed'].fillna(0).astype(int)
 
+# Fix types
+df['pl_discyear'] = df['pl_discyear'].astype(int)
+df['pl_orbper'] = pd.to_numeric(df['pl_orbper'], errors='coerce')
+df['pl_radius'] = pd.to_numeric(df['pl_radius'], errors='coerce')
+
+# Remove extreme outliers
+df = df[df['pl_orbper'] < 1e4]
+df = df[df['pl_radius'] < 50]
+
 # Reset index
 df.reset_index(drop=True, inplace=True)
 
